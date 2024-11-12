@@ -76,7 +76,7 @@ mod test {
 
     #[tokio::test]
     async fn test_cache_get() {
-        let manager = MemcacheConnectionManager::new("tcp://localhost:11211").unwrap();
+        let manager = MemcacheConnectionManager::new("tcp://127.0.0.1:11211").unwrap();
         let pool = bb8::Pool::builder().build(manager).await.unwrap();
 
         let pool = pool.clone();
@@ -95,7 +95,7 @@ mod test {
 
     #[tokio::test]
     async fn test_cache_add_delete() {
-        let manager = MemcacheConnectionManager::new("tcp://localhost:11211").unwrap();
+        let manager = MemcacheConnectionManager::new("tcp://127.0.0.1:11211").unwrap();
         let pool = bb8::Pool::builder().build(manager).await.unwrap();
 
         let pool = pool.clone();
@@ -119,12 +119,14 @@ mod test {
 
     #[tokio::test]
     async fn test_cache_unix_socket() {
-        let manager = MemcacheConnectionManager::new("unix:/tmp/memcached.sock").unwrap();
-        let pool = bb8::Pool::builder().build(manager).await.unwrap();
+        #[cfg(unix)] {
+            let manager = MemcacheConnectionManager::new("unix:/tmp/memcached.sock").unwrap();
+            let pool = bb8::Pool::builder().build(manager).await.unwrap();
 
-        let pool = pool.clone();
-        let mut conn = pool.get().await.unwrap();
+            let pool = pool.clone();
+            let mut conn = pool.get().await.unwrap();
 
-        assert!(conn.flush().await.is_ok());
+            assert!(conn.flush().await.is_ok());
+        }
     }
 }
